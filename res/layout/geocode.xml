@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+<EditText android:text="@+id/EditText01" 
+android:id="@+id/EditText01" 
+android:layout_width="wrap_content" 
+android:layout_height="wrap_content" 
+xmlns:android="http://schemas.android.com/apk/res/android"></EditText>
+<RadioGroup android:id="@+id/geocoderGroup"
+android:layout_width="fill_parent"
+android:layout_height="wrap_content"
+android:orientation="horizontal">
+
+<TextView android:layout_width="fill_parent"
+ 
+                        android:layout_height="wrap_content"
+ 
+                        android:text="Select Geocoder" android:textStyle="bold" />
+ 
+                <RadioButton android:checked="false"
+ 
+                        android:text="@string/geocoder_group_android" android:id="@+id/optionAndroid" />
+ 
+                <RadioButton android:checked="false"
+ 
+                        android:text="@string/geocoder_group_yahoo" android:id="@+id/optionYahoo" />
+ 
+              
+</RadioGroup>
+
+</LinearLayout>

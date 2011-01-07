@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello">Hello World!</string>
+    <string name="app_name">Android Map Demo</string>
+    <string name="login_label">Login</string>
+<string name="map_google_button_label">Google Map</string>
+<string name="map_esri_button_label">ESRI Map</string>
+<string name="gps_button_label">GPS</string>
+<string name="exit_button_label"><b>Exit</b></string>
+<string name="invalid_login_text">Invalid username or password</string>
+<string name="invalid_login_title">Invalid Login</string>
+<string name="main_menu_title"><b>Main Menu</b></string>
+<string name="gps_not_available"><b>Not Available</b></string>
+<string name="gps_title"><b>GPS</b></string>
+<string name="address_not_available"><b>Address Not Available</b></string>
+<string name="create_point_menu_text"><b>Point</b></string>
+<string name="create_line_menu_text"><b>Line</b></string>
+<string name="create_polygon_menu_text"><b>Polygon</b></string>
+<string name="save_menu_text"><b>Save</b></string>
+<string name="snap_gps_menu_text"><b>Snap to GPS</b></string>
+<string name="more_options_menu_text"><b>More...</b></string>
+<string name="search_address_menu_text"><b>Search Address</b></string>
+<string name="switch_satellite_view_menu_text"><b>Aerial</b></string>
+<string name="switch_map_view_menu_text"><b>Street</b></string>
+<string name="geocoder_group_android"><b>Android</b></string>
+<string name="geocoder_group_yahoo"><b>Yahoo</b></string>
+</resources>
