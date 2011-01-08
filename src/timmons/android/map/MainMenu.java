@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.TextView;
 
 public class MainMenu extends Activity implements OnClickListener{
 	
@@ -18,8 +19,10 @@ public class MainMenu extends Activity implements OnClickListener{
 	        View googleMapButton=findViewById(R.id.map_google_button);
 	        googleMapButton.setOnClickListener(this);
 	        
-	     
-	        
+	        Intent i=getIntent();
+	     String name=i.getStringExtra("Name");
+	     TextView nameView=(TextView)findViewById(R.id.user_name_label);
+	        nameView.setText("Welcome "+ name);
 	        
 	        
 

@@ -4,20 +4,8 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     >
-<EditText  android:id="@+id/userNameText" 
-		   android:layout_width="fill_parent"
-		   android:layout_height="wrap_content"
-		   android:text="testuser"
-		   android:layout_marginBottom="25dip"
-		 >
-</EditText>
-<EditText  android:id="@+id/passwordText" 
-		   android:layout_width="fill_parent"
-		   android:layout_height="wrap_content"
-		   android:text="test"
-		   android:layout_marginBottom="25dip"
-		 >
-</EditText>
+
+
  <Button
     android:id="@+id/login_button"
     android:layout_width="fill_parent" 
