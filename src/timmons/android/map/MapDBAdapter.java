@@ -15,7 +15,7 @@ public class MapDBAdapter {
 	static final String DBNAME="demoDB";
 	
 	/** Employees Table Definition. */
-	static final String employeeTable="Employees";
+	static final String pointAttributeTable="Employees";
 	static final String colID="EmployeeID";
 	static final String colName="EmployeeName";
 	
@@ -30,15 +30,15 @@ public class MapDBAdapter {
 	private static final String LOGIN_CREATE="CREATE TABLE "+loginTable+" ("+colLoginID+ " INTEGER PRIMARY KEY , "+
 				 colUserName+ " TEXT, " + colPassword + " TEXT);";
 	
-	private static final String EMPLOYEE_CREATE="CREATE TABLE "+employeeTable+" ("+colID+" INTEGER PRIMARY KEY AUTOINCREMENT, "+
+	private static final String EMPLOYEE_CREATE="CREATE TABLE "+pointAttributeTable+" ("+colID+" INTEGER PRIMARY KEY AUTOINCREMENT, "+
     colName+" TEXT ,FOREIGN KEY ("+colID+") REFERENCES "+loginTable+" ("+loginTable+"));";
 	
 	private static final String EMPLOYEE_VIEW_CREATE="CREATE VIEW "+viewEmps+
-    " AS SELECT "+employeeTable+"."+colID+" AS _id,"+
-    " "+employeeTable+"."+colName+","+
+    " AS SELECT "+pointAttributeTable+"."+colID+" AS _id,"+
+    " "+pointAttributeTable+"."+colName+","+
     " "+loginTable+"."+colUserName+""+
     " "+loginTable+"."+colPassword+""+
-    " FROM "+employeeTable+" JOIN "+loginTable+" ON "+employeeTable+"."+colID+" ="+loginTable+"."+colLoginID;
+    " FROM "+pointAttributeTable+" JOIN "+loginTable+" ON "+pointAttributeTable+"."+colID+" ="+loginTable+"."+colLoginID;
 	
 	// Variable to hold the database instance
 	private SQLiteDatabase db;
@@ -77,15 +77,15 @@ public class MapDBAdapter {
 		ContentValues cv=new ContentValues();
 		   cv.put(colID, 1);
 		   cv.put(colName, "Test");
-		   db.insert(employeeTable, colID, cv);
+		   db.insert(pointAttributeTable, colID, cv);
 		   		  
 		   cv.put(colID, 2);
 		   cv.put(colName, "Apurva");
-		   db.insert(employeeTable, colID, cv);
+		   db.insert(pointAttributeTable, colID, cv);
 		   		   
 		   cv.put(colID, 3);
 		   cv.put(colName, "Timmons");
-		   db.insert(employeeTable, colID, cv);
+		   db.insert(pointAttributeTable, colID, cv);
 		   				
 	}
 	
@@ -110,7 +110,7 @@ public class MapDBAdapter {
 	}
 	
 	public boolean removeEmployee(long _rowIndex) {
-		return (db.delete(employeeTable, colID +
+		return (db.delete(pointAttributeTable, colID +
 		"=" + _rowIndex, null)+  db.delete(loginTable, colLoginID +
 				"=" + _rowIndex, null))> 0;
 		}
@@ -129,6 +129,7 @@ public class MapDBAdapter {
 		
 		**/
 	
+	/**
 	public Employee getEmployee(String username, String password) {
 		String [] columns=new String[]{colID,colName};
 		String where = colUserName + "=" + username +" AND " + colPassword +"=" +password;
@@ -140,7 +141,7 @@ public class MapDBAdapter {
 		return employee;
 		}
 	
-	
+	**/
 	
 	private static class DatabaseHelper extends SQLiteOpenHelper{
 						
@@ -165,7 +166,7 @@ public class MapDBAdapter {
 			_oldVersion + " to " +
 			_newVersion +
 			", which will destroy all old data");
-			_db.execSQL("DROP TABLE IF EXISTS "+employeeTable);
+			_db.execSQL("DROP TABLE IF EXISTS "+pointAttributeTable);
 			  _db.execSQL("DROP TABLE IF EXISTS "+loginTable);  
 			  _db.execSQL("DROP VIEW IF EXISTS "+viewEmps);
 			  onCreate(_db);

@@ -10,13 +10,14 @@
     android:id="@+id/login_button"
     android:layout_width="fill_parent" 
     android:layout_height="wrap_content" 
-    android:text="@string/login_label"
+    android:text="Login using Facebook"
+    android:padding="10dp"
     />
      <Button
     android:id="@+id/exit_app_button"
     android:layout_width="fill_parent" 
     android:layout_height="wrap_content" 
-      android:text="@string/exit_button_label"
+    android:text="Logout"
     android:onClick="exitButtonClick"
     />
 </LinearLayout>

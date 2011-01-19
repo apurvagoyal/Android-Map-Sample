@@ -18,15 +18,19 @@ public class SketchOverlay extends Overlay{
 
 	//Location location;
 	private final int mRadius=5;
-	private ArrayList<Point> points = new ArrayList<Point>();
-	private ArrayList<Point> lineVertices = new ArrayList<Point>();
-	private ArrayList<Point> polyVertices = new ArrayList<Point>();
+	//private ArrayList<Point> points = new ArrayList<Point>();
+	private ArrayList<MapPoint> points = new ArrayList<MapPoint>();
+	private ArrayList<MapLine> lines = new ArrayList<MapLine>();
+	private ArrayList<MapPolygon> polygons = new ArrayList<MapPolygon>();
 	
 	private Projection projection;
 	private Point lastPoint=null;
-	private int selectedShape;
+	private ShapeType selectedShape;
 	private Paint paint;
 	private Path path;
+	private MapLine currentLine=null;
+	private MapPolygon currentPolygon=null;
+	private int color;
 	/**
 	public Location getLocation() {
 		return location;
@@ -37,60 +41,168 @@ public class SketchOverlay extends Overlay{
 	}
 	**/
 	
-	public void SetShape(int shape )
+	public enum ShapeType {
+	    POINT,LINE,POLYGON
+	}
+	
+	public void SetShape(ShapeType shape )
 	{
 		selectedShape=shape;
 	}
 
-	public void SetPaint(Paint myPaint )
+	public void SetColor(int clor )
 	{
-		paint=myPaint;
+		color=clor;
+		paint.setColor(color);
 	}
 	
-	public void ClosePoly()
+	public void FinishFeature()
 	{
+		switch(selectedShape)
+		{
+		case LINE:
+			lines.add(currentLine);
+			currentLine=null;
+			break;
+		case POLYGON:
+			polygons.add(currentPolygon);
+			currentPolygon=null;
+			path=null;
+			break;
+		}
 		
 	}
+	
+	public void StartFeature()
+	{
+		switch(selectedShape)
+		{
+		case LINE:
+			currentLine=new MapLine();
+			currentLine.color=color;
+			break;
+		case POLYGON:
+			currentPolygon=new MapPolygon();
+			currentPolygon.color=color;
+			break;
+		}
+		
+		
+	}
+	
 	@Override
 	public void draw(Canvas canvas, MapView mapView, boolean shadow)
 	{
 		
 		if(shadow=true)
 		{
-			//Double latitude=location.getLatitude()*1E6;
-			//Double longitude=location.getLongitude()*1E6;
-			//GeoPoint geoPoint=new GeoPoint(latitude.intValue(),longitude.intValue());
+			paint=new Paint();
+			paint.setStrokeWidth(2);
+			paint.setStyle(Paint.Style.FILL_AND_STROKE);
+			paint.setAntiAlias(true); 
 			
-				for (Point point : points) {
-		            canvas.drawCircle(point.x, point.y, 5, paint);		           
+			
+			
+				for (MapPoint pt : points) {
+					int col=pt.color;
+					paint.setColor(col);
+		            canvas.drawCircle(pt.point.x, pt.point.y, 5, paint);		           
 		        }
 				
-				if(lineVertices.size()>0)
-				{	
-					if(lineVertices.size()==1){canvas.drawCircle(lastPoint.x, lastPoint.y, 5, paint);}
-					else
+				if(lines.size()>0)
+				{
+					for(MapLine line:lines)
 					{
-						for (int number = 0; number <= lineVertices.size()-2; number++) {
-							canvas.drawLine(lineVertices.get(number).x, lineVertices.get(number).y, lineVertices.get(number+1).x, lineVertices.get(number+1).y, paint);
-						}	
+						if(line!=null)
+						{
+							if(line.vertices.size()>0)
+							{	
+								paint.setColor(line.color);
+							
+								
+								if(line.vertices.size()==1){canvas.drawCircle(lastPoint.x, lastPoint.y, 5, paint);}
+								else
+								{
+									for (int number = 0; number <= line.vertices.size()-2; number++) {
+										canvas.drawLine(line.vertices.get(number).x, line.vertices.get(number).y, line.vertices.get(number+1).x, line.vertices.get(number+1).y, paint);
+									}	
+								}
+							}
+						}
+					
 					}
 				}
 				
-				if(path!=null)
+					if(currentLine!=null)
+					{
+						if(currentLine.vertices.size()>0)
+						{	
+							paint.setColor(color);
+							if(currentLine.vertices.size()==1){canvas.drawCircle(lastPoint.x, lastPoint.y, 5, paint);}
+							else
+							{
+								for (int number = 0; number <= currentLine.vertices.size()-2; number++) {
+									canvas.drawLine(currentLine.vertices.get(number).x, currentLine.vertices.get(number).y, currentLine.vertices.get(number+1).x, currentLine.vertices.get(number+1).y, paint);
+								}	
+							}
+						}
+					}
+				
+				
+				/**
+				 * Drawing polygons
+				 * 
+				 */
+				
+					//if there are multiple polygons in list
+					if(polygons.size()>0)
+					{
+						for(MapPolygon polygon:polygons)
+						{			
+							if(polygon!=null)
+							{
+								paint.setColor(polygon.color);
+								
+								if(polygon.vertices.size()>1)
+								{
+									Path polyPath=new Path();
+									
+									for (int number = 0; number <= polygon.vertices.size()-2; number++) {
+										polyPath.moveTo(polygon.vertices.get(number).x, polygon.vertices.get(number).y);
+										polyPath.lineTo(polygon.vertices.get(number+1).x, polygon.vertices.get(number+1).y);				
+								}
+								 
+									if(polygon.vertices.size()>2)
+										{
+										polyPath.moveTo(polygon.vertices.get(polygon.vertices.size()-1).x, polygon.vertices.get(polygon.vertices.size()-1).y);
+										polyPath.lineTo(polygon.vertices.get(0).x, polygon.vertices.get(0).y);
+										polyPath.close();
+										}
+									
+								canvas.drawPath(polyPath, paint);
+								}
+							}
+							
+						}
+						
+					}
+					
+				if(currentPolygon!=null)
 				{	
+					paint.setColor(color);
 					canvas.drawCircle(lastPoint.x, lastPoint.y, 5, paint);
 					
-					if(polyVertices.size()>1)
+					if(currentPolygon.vertices.size()>1)
 					{
-						for (int number = 0; number <= polyVertices.size()-2; number++) {
-							path.moveTo(polyVertices.get(number).x, polyVertices.get(number).y);
-							path.lineTo(polyVertices.get(number+1).x, polyVertices.get(number+1).y);				
+						for (int number = 0; number <= currentPolygon.vertices.size()-2; number++) {
+							path.moveTo(currentPolygon.vertices.get(number).x, currentPolygon.vertices.get(number).y);
+							path.lineTo(currentPolygon.vertices.get(number+1).x, currentPolygon.vertices.get(number+1).y);				
 					}
 					 
-						if(polyVertices.size()>2)
+						if(currentPolygon.vertices.size()>2)
 							{
-							path.moveTo(polyVertices.get(polyVertices.size()-1).x, polyVertices.get(polyVertices.size()-1).y);
-							path.lineTo(polyVertices.get(0).x, polyVertices.get(0).y);
+							path.moveTo(currentPolygon.vertices.get(currentPolygon.vertices.size()-1).x, currentPolygon.vertices.get(currentPolygon.vertices.size()-1).y);
+							path.lineTo(currentPolygon.vertices.get(0).x, currentPolygon.vertices.get(0).y);
 							path.close();
 							}
 						
@@ -117,18 +229,17 @@ public class SketchOverlay extends Overlay{
 		lastPoint=screenPoint;
 		switch(selectedShape)
 		{
-		case 1:
-			points.add(screenPoint);
+		case POINT:
+			points.add(new MapPoint(screenPoint,color));
 			break;
 			
-		case 2:
-			lineVertices.add(screenPoint);
+		case LINE:
+			currentLine.vertices.add(screenPoint);
 			break;
 			
-		case 3:
-			//if(path==null){path=new Path();}
+		case POLYGON:
 			path=new Path();
-			polyVertices.add(screenPoint);
+			currentPolygon.vertices.add(screenPoint);
 			break;
 		}
 		

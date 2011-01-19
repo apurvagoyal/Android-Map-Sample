@@ -24,6 +24,10 @@ android:theme="@style/GlobalTheme">
 android:label="@string/gps_title"
 android:theme="@style/GlobalTheme">
 </activity>
+<activity android:name=".ColorSelector" 
+android:label="@string/change_color_menu_title"
+android:theme="@style/GlobalTheme">
+</activity>
 <uses-library android:name="com.google.android.maps"/>
     </application>
   

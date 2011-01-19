@@ -4,7 +4,7 @@
     <string name="app_name">Android Map Demo</string>
     <string name="login_label">Login</string>
 <string name="map_google_button_label">Google Map</string>
-<string name="map_esri_button_label">ESRI Map</string>
+<string name="map_open_street_button_label">Open Street Map</string>
 <string name="gps_button_label">GPS</string>
 <string name="exit_button_label"><b>Exit</b></string>
 <string name="invalid_login_text">Invalid username or password</string>
@@ -22,6 +22,7 @@
 <string name="search_address_menu_text"><b>Search Address</b></string>
 <string name="switch_satellite_view_menu_text"><b>Aerial</b></string>
 <string name="switch_map_view_menu_text"><b>Street</b></string>
-<string name="geocoder_group_android"><b>Android</b></string>
-<string name="geocoder_group_yahoo"><b>Yahoo</b></string>
+<string name="finish_line_text"><b>Finish Line</b></string>
+<string name="finish_polygon_menu_text"><b>Finish Polygon</b></string>
+<string name="change_color_menu_title"><b>Symbolize</b></string>
 </resources>

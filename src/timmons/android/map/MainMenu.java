@@ -2,6 +2,7 @@ package timmons.android.map;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -42,6 +43,7 @@ public class MainMenu extends Activity implements OnClickListener{
 		{
 		case (R.id.map_google_button):
 			i=new Intent(this,GPSScreen.class);
+		
 		startActivity(i);
 		break;
 

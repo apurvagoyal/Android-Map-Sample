@@ -5,10 +5,12 @@ import java.util.List;
 import java.util.Locale;
 
 import timmons.android.map.R;
+import timmons.android.map.SketchOverlay.ShapeType;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Paint;
 import android.location.Address;
 import android.location.Criteria;
@@ -51,7 +53,11 @@ public class GPSScreen extends MapActivity {
 	static final private int MENU_ITEM_SNAP_GPS = Menu.FIRST+6;
 	static final private int MENU_ITEM_LAYERS = Menu.FIRST+7;
 	static final private int MENU_ITEM_SEARCH_ADDRESS = Menu.FIRST+8;
+	static final private int MENU_ITEM_CHANGE_COLOR = Menu.FIRST+9;
+	private static final int COLOR_SUBACTIVITY=1;
 	 public static final int TEST = 25;
+	 private boolean isFeatureStarted=false;
+	private ShapeType currentShapeType=ShapeType.POINT;
 	
 	private final LocationListener locationListener=new LocationListener()
 	{
@@ -69,7 +75,7 @@ public class GPSScreen extends MapActivity {
 		public void onStatusChanged(String provider, int status, Bundle extras){}
 		
 	};
-	private Paint paint;
+	//private Paint paint;
 	@Override
 	protected boolean isRouteDisplayed() {
 	return false;
@@ -87,7 +93,7 @@ public class GPSScreen extends MapActivity {
 		gc=new Geocoder(this,Locale.US);
 		
 		googleMapView.setSatellite(false);
-		googleMapView.setStreetView(true);
+		//googleMapView.setStreetView(true);
 		googleMapView.displayZoomControls(true);
 		googleMapView.setBuiltInZoomControls(true);
 		
@@ -109,12 +115,14 @@ public class GPSScreen extends MapActivity {
 		Location location=locationManager.getLastKnownLocation(provider);
 		locationManager.requestLocationUpdates(provider, 2000, 10, locationListener);
 		
+		/**
 		paint=new Paint();
 		paint.setARGB(250, 255, 0, 0);
 		paint.setStrokeWidth(2);
 		paint.setStyle(Paint.Style.STROKE);
 		paint.setAntiAlias(true); 
 		sketchOverlay.SetPaint(paint);
+		**/
 		
 		//initLocationOverlay();
 		updateWithNewLocation(location);
@@ -138,6 +146,7 @@ public class GPSScreen extends MapActivity {
 		MenuItem menuItemMore = menu.add(groupId, MENU_ITEM_MORE,Menu.NONE, R.string.more_options_menu_text);
 		MenuItem menuItemSnapGPS = menu.add(groupId, MENU_ITEM_SNAP_GPS,Menu.NONE, R.string.snap_gps_menu_text);
 		MenuItem menuItemSearchAddress = menu.add(groupId, MENU_ITEM_SEARCH_ADDRESS,Menu.NONE, R.string.search_address_menu_text);
+		MenuItem menuItemChangeColor=menu.add(groupId,MENU_ITEM_CHANGE_COLOR,Menu.NONE,R.string.change_color_menu_title);
 		
 		//can add option for changing view in more options
 		//finish sketch
@@ -154,6 +163,27 @@ public class GPSScreen extends MapActivity {
 	
 	}
 	else{menuItem.setTitle(R.string.switch_satellite_view_menu_text);}
+	
+	//switch title of line menu item finish_line_text
+	if(currentShapeType==ShapeType.LINE)
+	{
+		MenuItem menuItemLine = menu.findItem(MENU_ITEM_LINE);
+		if(isFeatureStarted)
+		{
+			menuItemLine.setTitle(R.string.finish_line_text);
+		}
+		else{menuItemLine.setTitle(R.string.create_line_menu_text);}
+	}
+	else if(currentShapeType==ShapeType.POLYGON)
+	{
+		MenuItem menuItemPoly = menu.findItem(MENU_ITEM_POLYGON);
+		if(isFeatureStarted)
+		{
+			menuItemPoly.setTitle(R.string.finish_polygon_menu_text);
+		}
+		else{menuItemPoly.setTitle(R.string.create_polygon_menu_text);}
+	}
+	
 	return true;
 	}
 	
@@ -164,13 +194,26 @@ public class GPSScreen extends MapActivity {
 		switch (item.getItemId()) {
 		// Check for each known menu item
 		case (MENU_ITEM_POINT):
-			sketchOverlay.SetShape(1);
+			currentShapeType=ShapeType.POINT;
+			sketchOverlay.SetShape(currentShapeType);
 		return true;
 		case (MENU_ITEM_LINE):
-			sketchOverlay.SetShape(2);
+			currentShapeType=ShapeType.LINE;
+			sketchOverlay.SetShape(currentShapeType);
+			if(isFeatureStarted)
+			{
+				sketchOverlay.FinishFeature();
+			}else{sketchOverlay.StartFeature();}
+			isFeatureStarted=!isFeatureStarted;
 			return true;
 		case (MENU_ITEM_POLYGON):
-			sketchOverlay.SetShape(3);
+			currentShapeType=ShapeType.POLYGON;
+			sketchOverlay.SetShape(currentShapeType);
+		if(isFeatureStarted)
+		{
+			sketchOverlay.FinishFeature();
+		}else{sketchOverlay.StartFeature();}
+		isFeatureStarted=!isFeatureStarted;
 			return true;
 		case (MENU_ITEM_SEARCH_ADDRESS):
 			getAddress();
@@ -185,6 +228,18 @@ public class GPSScreen extends MapActivity {
 			googleMapView.setStreetView(false);	
 		}
 			return true;
+			
+		case (MENU_ITEM_CHANGE_COLOR):
+			ColorPickerDialog.OnColorChangedListener colorChangedListener=new ColorPickerDialog.OnColorChangedListener()
+		{
+			 public void colorChanged(int color) {
+				 sketchOverlay.SetColor(color);
+	            }
+		
+		};
+			ColorPickerDialog colorPicker=new ColorPickerDialog(this,colorChangedListener,0xFFFF0000);
+		colorPicker.show();
+		
 		}
 		// Return false if you have not handled the menu item.
 		return false;
@@ -213,8 +268,8 @@ public class GPSScreen extends MapActivity {
 		
 		addressAlert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int whichButton) {
-				new SearchAddressTask().execute(input.getText().toString());
-				/**
+				//new SearchAddressTask().execute(input.getText().toString());
+				
 				searchAddress = input.getText().toString();
 				try {
 				       foundAdresses = gc.getFromLocationName(searchAddress, 5); //Search addresses
@@ -238,7 +293,7 @@ public class GPSScreen extends MapActivity {
 			    	  
 			      }
 			      else{displayMessage("Invalid address","Cannot find any address");}
-				**/
+				
 				
 				
 				
