@@ -31,6 +31,8 @@ public class SketchOverlay extends Overlay{
 	private MapLine currentLine=null;
 	private MapPolygon currentPolygon=null;
 	private int color;
+	private GeoPoint snapLocation=null;
+	
 	/**
 	public Location getLocation() {
 		return location;
@@ -56,6 +58,13 @@ public class SketchOverlay extends Overlay{
 		paint.setColor(color);
 	}
 	
+	public void SnapMarker(Location location)
+	{
+		Double geoLat=location.getLatitude()*1E6;
+		Double geoLng=location.getLongitude()*1E6;
+		
+		snapLocation= new GeoPoint(geoLat.intValue(), geoLng.intValue());
+	}
 	public void FinishFeature()
 	{
 		switch(selectedShape)
@@ -222,7 +231,13 @@ public class SketchOverlay extends Overlay{
 	
 	@Override
 	public boolean onTap(GeoPoint point, MapView mapView)
-	{		
+	{	
+		
+		if(snapLocation!=null){
+			point=snapLocation;
+			snapLocation=null;
+		}
+		
 		projection=mapView.getProjection();
 		Point screenPoint=new Point();
 		projection.toPixels(point, screenPoint);

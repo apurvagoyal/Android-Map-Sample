@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Paint;
+import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Criteria;
 import android.location.Geocoder;
@@ -33,6 +34,7 @@ import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.Overlay;
+import com.google.android.maps.OverlayItem;
 
 public class GPSScreen extends MapActivity {
 	
@@ -58,6 +60,10 @@ public class GPSScreen extends MapActivity {
 	 public static final int TEST = 25;
 	 private boolean isFeatureStarted=false;
 	private ShapeType currentShapeType=ShapeType.POINT;
+	private AddressItemizedOverlay itemizedAddressOverlay;
+	private GeoPoint currentAddressLocation=null;
+	private Location currentGPSLocation=null;
+	private LocationManager locationManager;;
 	
 	private final LocationListener locationListener=new LocationListener()
 	{
@@ -93,7 +99,6 @@ public class GPSScreen extends MapActivity {
 		gc=new Geocoder(this,Locale.US);
 		
 		googleMapView.setSatellite(false);
-		//googleMapView.setStreetView(true);
 		googleMapView.displayZoomControls(true);
 		googleMapView.setBuiltInZoomControls(true);
 		
@@ -106,9 +111,12 @@ public class GPSScreen extends MapActivity {
 		sketchOverlay=new SketchOverlay();
 		List<Overlay> mapOverlays=googleMapView.getOverlays();
 		mapOverlays.add(sketchOverlay);
-			
 		
-		LocationManager locationManager;
+		Drawable drawable = this.getResources().getDrawable(R.drawable.iconb1);
+		itemizedAddressOverlay= new AddressItemizedOverlay(drawable);
+		mapOverlays.add(itemizedAddressOverlay);
+		
+		
 		String context=Context.LOCATION_SERVICE;
 		locationManager=(LocationManager)getSystemService(context);
 		String provider=LocationManager.GPS_PROVIDER;
@@ -125,6 +133,7 @@ public class GPSScreen extends MapActivity {
 		**/
 		
 		//initLocationOverlay();
+		
 		updateWithNewLocation(location);
 	}
 	
@@ -218,6 +227,9 @@ public class GPSScreen extends MapActivity {
 		case (MENU_ITEM_SEARCH_ADDRESS):
 			getAddress();
 			return true;
+		case (MENU_ITEM_SNAP_GPS):
+			if(currentGPSLocation!=null){sketchOverlay.SnapMarker(currentGPSLocation);}
+			return true;
 		case (MENU_ITEM_SWITCH_VIEW):
 			MapView googleMapView=(MapView)findViewById(R.id.myMapView);
 		if(googleMapView.isSatellite()){
@@ -245,6 +257,7 @@ public class GPSScreen extends MapActivity {
 		return false;
 	}
 	
+	
 	private void updateWithNewLocation(Location location)
 	{	
 		if(location!=null)
@@ -252,7 +265,8 @@ public class GPSScreen extends MapActivity {
 			Double geoLat=location.getLatitude()*1E6;
 			Double geoLng=location.getLongitude()*1E6;
 			navigateToLocation(geoLat,geoLng);
-			//displayCurrentLocation(location);
+			displayAddressMarker(geoLat,geoLng);
+			currentGPSLocation=location;
 		}
 	}
 			
@@ -268,8 +282,9 @@ public class GPSScreen extends MapActivity {
 		
 		addressAlert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int whichButton) {
-				//new SearchAddressTask().execute(input.getText().toString());
+				new SearchAddressTask().execute(input.getText().toString());
 				
+				/**
 				searchAddress = input.getText().toString();
 				try {
 				       foundAdresses = gc.getFromLocationName(searchAddress, 5); //Search addresses
@@ -294,7 +309,7 @@ public class GPSScreen extends MapActivity {
 			      }
 			      else{displayMessage("Invalid address","Cannot find any address");}
 				
-				
+				**/
 				
 				
 				
@@ -325,6 +340,15 @@ public class GPSScreen extends MapActivity {
 		mapController.animateTo(point1);
 		mapController.setCenter(point1);
 		mapController.setZoom(15);
+	}
+	
+	private void displayAddressMarker(Double lat, Double lon)
+	{
+		currentAddressLocation = new GeoPoint(lat.intValue(), lon.intValue());
+		
+		OverlayItem overlayitem = new OverlayItem(currentAddressLocation,null,null);
+		itemizedAddressOverlay.addOverlay(overlayitem);
+		
 	}
 	
 	 private class SearchAddressTask extends AsyncTask<String, Void, Void> {
@@ -362,6 +386,7 @@ public class GPSScreen extends MapActivity {
 			    	  double lon=foundAddress.getLongitude();
 			    	  
 			    	  navigateToLocation((lat * 1000000), (lon * 1000000));
+			    	  displayAddressMarker((lat * 1000000), (lon * 1000000));
 			      }
 		    	  
 		      }
