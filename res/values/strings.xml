@@ -25,4 +25,7 @@
 <string name="finish_line_text"><b>Finish Line</b></string>
 <string name="finish_polygon_menu_text"><b>Finish Polygon</b></string>
 <string name="change_color_menu_title"><b>Symbolize</b></string>
+<string name="load_fusion_data_menu_title"><b>Show Johns Pizza Locations</b></string>
+<string name="reset_menu_title"><b>Reset</b></string>
+<string name="identify_menu_title"><b>Show Info</b></string>
 </resources>

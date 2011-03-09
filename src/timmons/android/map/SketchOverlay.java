@@ -25,12 +25,12 @@ public class SketchOverlay extends Overlay{
 	
 	private Projection projection;
 	private Point lastPoint=null;
-	private ShapeType selectedShape;
+	private ShapeType selectedShape=ShapeType.NONE;
 	private Paint paint;
 	private Path path;
 	private MapLine currentLine=null;
 	private MapPolygon currentPolygon=null;
-	private int color;
+	private int color=0xFFFF0000;
 	private GeoPoint snapLocation=null;
 	
 	/**
@@ -44,7 +44,7 @@ public class SketchOverlay extends Overlay{
 	**/
 	
 	public enum ShapeType {
-	    POINT,LINE,POLYGON
+	    POINT,LINE,POLYGON,NONE
 	}
 	
 	public void SetShape(ShapeType shape )
@@ -242,6 +242,7 @@ public class SketchOverlay extends Overlay{
 		Point screenPoint=new Point();
 		projection.toPixels(point, screenPoint);
 		lastPoint=screenPoint;
+		
 		switch(selectedShape)
 		{
 		case POINT:

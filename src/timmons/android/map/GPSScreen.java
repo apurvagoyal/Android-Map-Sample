@@ -1,8 +1,15 @@
 package timmons.android.map;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.List;
 import java.util.Locale;
+
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
+import org.xml.sax.InputSource;
+import org.xml.sax.XMLReader;
 
 import timmons.android.map.R;
 import timmons.android.map.SketchOverlay.ShapeType;
@@ -23,9 +30,11 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.android.maps.GeoPoint;
@@ -56,6 +65,9 @@ public class GPSScreen extends MapActivity {
 	static final private int MENU_ITEM_LAYERS = Menu.FIRST+7;
 	static final private int MENU_ITEM_SEARCH_ADDRESS = Menu.FIRST+8;
 	static final private int MENU_ITEM_CHANGE_COLOR = Menu.FIRST+9;
+	static final private int MENU_ITEM_LOAD_FUSION_DATA = Menu.FIRST+10;
+	static final private int MENU_ITEM_IDENTIFY = Menu.FIRST+11;
+	static final private int MENU_ITEM_RESET = Menu.FIRST+12;
 	private static final int COLOR_SUBACTIVITY=1;
 	 public static final int TEST = 25;
 	 private boolean isFeatureStarted=false;
@@ -64,7 +76,9 @@ public class GPSScreen extends MapActivity {
 	private GeoPoint currentAddressLocation=null;
 	private Location currentGPSLocation=null;
 	private LocationManager locationManager;;
-	
+	private PlacemarkOverlay placemarkOverlay;
+	private MapView googleMapView;
+	private List<Overlay> mapOverlays;
 	private final LocationListener locationListener=new LocationListener()
 	{
 		public void onLocationChanged(Location location){
@@ -92,7 +106,7 @@ public class GPSScreen extends MapActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.gps);
 
-		MapView googleMapView=(MapView)findViewById(R.id.myMapView);
+		googleMapView=(MapView)findViewById(R.id.myMapView);
 	
 		mapController=googleMapView.getController();
 		
@@ -109,12 +123,14 @@ public class GPSScreen extends MapActivity {
 		
 		//add the overlay
 		sketchOverlay=new SketchOverlay();
-		List<Overlay> mapOverlays=googleMapView.getOverlays();
+		mapOverlays=googleMapView.getOverlays();
 		mapOverlays.add(sketchOverlay);
 		
-		Drawable drawable = this.getResources().getDrawable(R.drawable.iconb1);
-		itemizedAddressOverlay= new AddressItemizedOverlay(drawable);
-		mapOverlays.add(itemizedAddressOverlay);
+		
+		
+		//Drawable drawable = this.getResources().getDrawable(R.drawable.iconb1);
+		//itemizedAddressOverlay= new AddressItemizedOverlay(drawable);
+		//mapOverlays.add(itemizedAddressOverlay);
 		
 		
 		String context=Context.LOCATION_SERVICE;
@@ -156,7 +172,9 @@ public class GPSScreen extends MapActivity {
 		MenuItem menuItemSnapGPS = menu.add(groupId, MENU_ITEM_SNAP_GPS,Menu.NONE, R.string.snap_gps_menu_text);
 		MenuItem menuItemSearchAddress = menu.add(groupId, MENU_ITEM_SEARCH_ADDRESS,Menu.NONE, R.string.search_address_menu_text);
 		MenuItem menuItemChangeColor=menu.add(groupId,MENU_ITEM_CHANGE_COLOR,Menu.NONE,R.string.change_color_menu_title);
-		
+		MenuItem menuLoadFusionData=menu.add(groupId,MENU_ITEM_LOAD_FUSION_DATA,Menu.NONE,R.string.load_fusion_data_menu_title);
+		MenuItem menuIdentify=menu.add(groupId,MENU_ITEM_IDENTIFY,Menu.NONE,R.string.identify_menu_title);
+		MenuItem menuReset=menu.add(groupId,MENU_ITEM_RESET,Menu.NONE,R.string.reset_menu_title);
 		//can add option for changing view in more options
 		//finish sketch
 		return true;
@@ -202,6 +220,21 @@ public class GPSScreen extends MapActivity {
 		// Find which menu item has been selected
 		switch (item.getItemId()) {
 		// Check for each known menu item
+		case(MENU_ITEM_RESET):
+			if(placemarkOverlay!=null)
+			{
+				placemarkOverlay.ClearBalloonLayout();
+			}
+			   
+			mapOverlays.clear();
+			return true;
+			
+		case (MENU_ITEM_IDENTIFY):
+			if(placemarkOverlay!=null)
+			{
+				placemarkOverlay.SetIdentifyMode();
+			}
+			return true;
 		case (MENU_ITEM_POINT):
 			currentShapeType=ShapeType.POINT;
 			sketchOverlay.SetShape(currentShapeType);
@@ -227,6 +260,9 @@ public class GPSScreen extends MapActivity {
 		case (MENU_ITEM_SEARCH_ADDRESS):
 			getAddress();
 			return true;
+		case (MENU_ITEM_LOAD_FUSION_DATA):
+			parseFusionData();
+			return true;
 		case (MENU_ITEM_SNAP_GPS):
 			if(currentGPSLocation!=null){sketchOverlay.SnapMarker(currentGPSLocation);}
 			return true;
@@ -251,6 +287,7 @@ public class GPSScreen extends MapActivity {
 		};
 			ColorPickerDialog colorPicker=new ColorPickerDialog(this,colorChangedListener,0xFFFF0000);
 		colorPicker.show();
+		
 		
 		}
 		// Return false if you have not handled the menu item.
@@ -340,6 +377,60 @@ public class GPSScreen extends MapActivity {
 		mapController.animateTo(point1);
 		mapController.setCenter(point1);
 		mapController.setZoom(15);
+	}
+	
+	private void parseFusionData()
+	{
+		try
+		{
+			SAXParserFactory spf = SAXParserFactory.newInstance();
+			SAXParser sp = spf.newSAXParser();
+			XMLReader xr = sp.getXMLReader();
+			 /** Send URL to parse XML Tags */
+			 //URL sourceUrl = new URL("http://www.google.com/fusiontables/exporttable?query=select+col0%2C+col1%2C+col2%2C+col3%2C+col4%2C+col5%2C+col6%2C+col7%2C+col8%2C+col9%2C+col10%2C+col11%2C+col12%2C+col13%2C+col14+from+408650+&o=kmllink&g=col14");
+			 /** Create handler to handle XML Tags ( extends DefaultHandler ) */
+			 
+			 URL sourceUrl=new URL("http://www.google.com/fusiontables/exporttable?query=select+col0%2C+col1%2C+col2%2C+col3+from+297050+&o=kmllink&g=col2");
+			 
+			 MyXMLHandler myXMLHandler = new MyXMLHandler();
+			 xr.setContentHandler(myXMLHandler);
+			 InputSource is=new InputSource();
+			 is.setEncoding("UTF-8"); 
+			
+             is.setByteStream(sourceUrl.openStream()); 
+			 //xr.parse(new InputSource(sourceUrl.openStream()));
+             xr.parse(is);
+         	
+         	if(myXMLHandler.getPlacemarks().size()>0)
+         	{
+         		 LayoutInflater layoutInflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+         		BalloonLayout noteBaloon = (BalloonLayout) layoutInflater.inflate(R.layout.balloonlayout, null);
+                 RelativeLayout.LayoutParams layoutParams   = new RelativeLayout.LayoutParams(200,100);
+                 layoutParams.addRule(RelativeLayout.CENTER_VERTICAL);
+                 layoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
+                 noteBaloon.setLayoutParams(layoutParams);   
+                 
+         		//mapOverlays.remove(sketchOverlay);
+         		placemarkOverlay=new PlacemarkOverlay();
+         		//placemarkOverlay.SetContext(this);
+         		placemarkOverlay.SetBalloonLayout(noteBaloon);
+         		placemarkOverlay.SetPlacemarks(myXMLHandler.getPlacemarks());
+mapOverlays.add(placemarkOverlay);
+
+        		googleMapView.postInvalidate();
+         	}
+         	
+			int m=0;
+		}
+		catch(Exception e)
+		{
+			System.out.println("XML Pasing Excpetion = " + e);
+
+		}
+		
+
+
+
 	}
 	
 	private void displayAddressMarker(Double lat, Double lon)
