@@ -7,6 +7,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.Point;
 import android.text.Html;
 import android.view.View;
@@ -68,22 +69,58 @@ public class PlacemarkOverlay extends Overlay{
 			paint.setStyle(Paint.Style.FILL_AND_STROKE);
 			paint.setAntiAlias(true); 
 			paint.setColor(color);
-			
+			projection=mapView.getProjection();
 			if(placemarks!=null)
 			{
 
 				for (Placemark pt : placemarks) {
 					if(pt!=null)
-					{
-						if(pt.getLatitude()!=null && pt.getLatitude()!=0 && pt.getLongitude()!=null && pt.getLongitude()!=0)
+					{					
+						
+						if(pt.getShape()!=null)
 						{
-							projection=mapView.getProjection();
-							Point placemarkPoint=new Point();
-							Double lat=pt.getLatitude()*1E6;
-							Double lng=pt.getLongitude()*1E6;
-							GeoPoint point1 = new GeoPoint(lat.intValue(), lng.intValue());
-							projection.toPixels(point1, placemarkPoint);
-				            canvas.drawCircle(placemarkPoint.x, placemarkPoint.y,2, paint);	
+							PlacemarkShape shape=pt.getShape();
+							if(shape instanceof PlacemarkPoint )
+							{
+								PlacemarkPoint placemarkPoint=(PlacemarkPoint)shape;
+								Point point1=new Point();
+								projection.toPixels(placemarkPoint.getShape(),point1);
+								canvas.drawCircle(point1.x, point1.y, 2, paint);
+							}
+							else if(shape instanceof PlacemarkPolygon )
+							{
+								PlacemarkPolygon placemarkPolygon=(PlacemarkPolygon)shape;
+								Path polyPath=new Path();
+								
+								for (int number = 0; number <= placemarkPolygon.getVertices().size()-2; number++) {
+									
+									Point point1=new Point();
+									GeoPoint vertex=placemarkPolygon.getVertices().get(number);
+									projection.toPixels(vertex,point1);
+									polyPath.moveTo(point1.x, point1.y);
+									vertex=placemarkPolygon.getVertices().get(number+1);
+									projection.toPixels(vertex,point1);
+									polyPath.lineTo(point1.x, point1.y);				
+							}
+							 
+								if(placemarkPolygon.getVertices().size()>2)
+									{
+									Point point2=new Point();
+									GeoPoint vertex=placemarkPolygon.getVertices().get(placemarkPolygon.getVertices().size()-1);
+									projection.toPixels(vertex,point2);
+									
+									polyPath.moveTo(point2.x, point2.y);
+									
+									vertex=placemarkPolygon.getVertices().get(0);
+									projection.toPixels(vertex,point2);
+									
+									polyPath.lineTo(point2.x, point2.y);
+									polyPath.close();
+									}
+								
+							canvas.drawPath(polyPath, paint);
+							}
+							
 						}
 					
 					}
@@ -107,30 +144,39 @@ public class PlacemarkOverlay extends Overlay{
 				
 				if(pt!=null)
 				{
-					if(pt.getLatitude()!=null && pt.getLatitude()!=0 && pt.getLongitude()!=null && pt.getLongitude()!=0)
+					PlacemarkShape shape=pt.getShape();
+					if(shape instanceof PlacemarkPoint )
 					{
-						Double alat=pt.getLatitude();
-						Double alng=pt.getLongitude();
+						PlacemarkPoint placemarkPoint=(PlacemarkPoint)shape;
+						GeoPoint geoPoint=placemarkPoint.getShape();
 						
-						Double blat=point.getLatitudeE6()/1E6;
-						Double blng=point.getLongitudeE6()/1E6;
+						Double lat=geoPoint.getLatitudeE6()/1E6;
+						Double lng=geoPoint.getLongitudeE6()/1E6;
 						
-						double currentDistance=Utils.calculateDistanceMeters(alng, alat, blng,blat);
-						if(distance==0)
-						{		
-							distance=currentDistance;
-							nearestPlacemark=pt;
+						if(lat!=null && lat!=0 && lng!=null && lng!=0)
+						{						
 							
-						}else
-						{
-							if(currentDistance<distance)
-							{
+							Double blat=point.getLatitudeE6()/1E6;
+							Double blng=point.getLongitudeE6()/1E6;
+							
+							double currentDistance=Utils.calculateDistanceMeters(lng, lat, blng,blat);
+							if(distance==0)
+							{		
 								distance=currentDistance;
 								nearestPlacemark=pt;
 								
+							}else
+							{
+								if(currentDistance<distance)
+								{
+									distance=currentDistance;
+									nearestPlacemark=pt;
+									
+								}
 							}
 						}
 					}
+					
 				}
 				
 				
@@ -146,20 +192,28 @@ public class PlacemarkOverlay extends Overlay{
 				alertDialog.setMessage(Html.fromHtml(currentDescription));
 				alertDialog.show();
 				**/
-				Double lat=nearestPlacemark.getLatitude()*1E6;
-				Double lng=nearestPlacemark.getLongitude()*1E6;
+				PlacemarkShape shape=nearestPlacemark.getShape();
+				if(shape instanceof PlacemarkPoint )
+				{
+					PlacemarkPoint placemarkPoint=(PlacemarkPoint)shape;
+					GeoPoint geoPoint=placemarkPoint.getShape();
+					
+					mapView.removeView(balloonLayout);
+					balloonLayout.setVisibility(View.VISIBLE);
+					                     ((TextView)balloonLayout.findViewById(R.id.note_label)).setText(Html.fromHtml(currentDescription));
+					                     
+					                    
+					                     mapView.getController().animateTo(geoPoint);
+					mapView.addView(balloonLayout, new MapView.LayoutParams(200,200,geoPoint,MapView.LayoutParams.BOTTOM_CENTER));
+					//mapView.setEnabled(false);        
+					isIdentify=false;
 				
-				GeoPoint balloonTip=new GeoPoint(lat.intValue(), lng.intValue());
+				}
 				
-				mapView.removeView(balloonLayout);
-				balloonLayout.setVisibility(View.VISIBLE);
-				                     ((TextView)balloonLayout.findViewById(R.id.note_label)).setText(Html.fromHtml(currentDescription));
-				                     
-				                    
-				                     mapView.getController().animateTo(balloonTip);
-				mapView.addView(balloonLayout, new MapView.LayoutParams(200,200,balloonTip,MapView.LayoutParams.BOTTOM_CENTER));
-				//mapView.setEnabled(false);        
-				isIdentify=false;
+				
+				
+				
+				
 			}
 		}
 	

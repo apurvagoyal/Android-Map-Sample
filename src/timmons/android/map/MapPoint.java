@@ -14,5 +14,10 @@ public class MapPoint {
 		color=col;
 		
 	}
+	
+	public MapPoint(Point pt)
+	{
+		point=pt;
+	}
 
 }

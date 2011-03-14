@@ -4,8 +4,9 @@ public class Placemark {
 
 	String name;
 	String description;
-	Double latitude;
-	Double longitude;
+	PlacemarkShape shape;
+	//Double latitude;
+	//Double longitude;
 	
 	public String getName() {
 	    return name;
@@ -19,6 +20,8 @@ public class Placemark {
 	public void setDescription(String description) {
 	    this.description = description;
 	}
+	
+	/**
 	public Double getLatitude() {
 	    return latitude;
 	}
@@ -31,6 +34,16 @@ public class Placemark {
 	}
 	public void setLongitude(Double longitude) {
 	    this.longitude = longitude;
+	}
+	**/
+	
+	public void setShape(PlacemarkShape shape)
+	{
+		this.shape=shape;
+	}
+	public PlacemarkShape getShape()
+	{
+		return shape;
 	}
 	
 

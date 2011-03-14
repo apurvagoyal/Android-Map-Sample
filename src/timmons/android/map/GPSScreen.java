@@ -65,9 +65,10 @@ public class GPSScreen extends MapActivity {
 	static final private int MENU_ITEM_LAYERS = Menu.FIRST+7;
 	static final private int MENU_ITEM_SEARCH_ADDRESS = Menu.FIRST+8;
 	static final private int MENU_ITEM_CHANGE_COLOR = Menu.FIRST+9;
-	static final private int MENU_ITEM_LOAD_FUSION_DATA = Menu.FIRST+10;
+	static final private int MENU_ITEM_JOHN_PIZZA_LOCATIONS = Menu.FIRST+10;
 	static final private int MENU_ITEM_IDENTIFY = Menu.FIRST+11;
 	static final private int MENU_ITEM_RESET = Menu.FIRST+12;
+	static final private int MENU_ITEM_TREATMENT = Menu.FIRST+13;
 	private static final int COLOR_SUBACTIVITY=1;
 	 public static final int TEST = 25;
 	 private boolean isFeatureStarted=false;
@@ -165,15 +166,20 @@ public class GPSScreen extends MapActivity {
 		MenuItem menuItemPoint = menu.add(groupId, MENU_ITEM_POINT,Menu.NONE, R.string.create_point_menu_text);
 		MenuItem menuItemLine = menu.add(groupId, MENU_ITEM_LINE,Menu.NONE, R.string.create_line_menu_text);
 		MenuItem menuItemPolygon = menu.add(groupId, MENU_ITEM_POLYGON,Menu.NONE, R.string.create_polygon_menu_text);
+		MenuItem menuLoadFusionData=menu.add(groupId,MENU_ITEM_JOHN_PIZZA_LOCATIONS,Menu.NONE,R.string.load_fusion_data_menu_title);
+		MenuItem menuWMITreatments=menu.add(groupId,MENU_ITEM_TREATMENT,Menu.NONE,R.string.wmi_treatment_menu_title);
+		
 		MenuItem menuItemSwitchView = menu.add(groupId, MENU_ITEM_SWITCH_VIEW,Menu.NONE, R.string.switch_satellite_view_menu_text);
 		
+		
+		//MenuItem menuItemMore = menu.add(groupId, MENU_ITEM_MORE,Menu.NONE, R.string.more_options_menu_text);
 		MenuItem menuItemSave = menu.add(groupId, MENU_ITEM_SAVE,Menu.NONE, R.string.save_menu_text);
-		MenuItem menuItemMore = menu.add(groupId, MENU_ITEM_MORE,Menu.NONE, R.string.more_options_menu_text);
+		MenuItem menuIdentify=menu.add(groupId,MENU_ITEM_IDENTIFY,Menu.NONE,R.string.identify_menu_title);
 		MenuItem menuItemSnapGPS = menu.add(groupId, MENU_ITEM_SNAP_GPS,Menu.NONE, R.string.snap_gps_menu_text);
 		MenuItem menuItemSearchAddress = menu.add(groupId, MENU_ITEM_SEARCH_ADDRESS,Menu.NONE, R.string.search_address_menu_text);
 		MenuItem menuItemChangeColor=menu.add(groupId,MENU_ITEM_CHANGE_COLOR,Menu.NONE,R.string.change_color_menu_title);
-		MenuItem menuLoadFusionData=menu.add(groupId,MENU_ITEM_LOAD_FUSION_DATA,Menu.NONE,R.string.load_fusion_data_menu_title);
-		MenuItem menuIdentify=menu.add(groupId,MENU_ITEM_IDENTIFY,Menu.NONE,R.string.identify_menu_title);
+		
+		
 		MenuItem menuReset=menu.add(groupId,MENU_ITEM_RESET,Menu.NONE,R.string.reset_menu_title);
 		//can add option for changing view in more options
 		//finish sketch
@@ -260,8 +266,11 @@ public class GPSScreen extends MapActivity {
 		case (MENU_ITEM_SEARCH_ADDRESS):
 			getAddress();
 			return true;
-		case (MENU_ITEM_LOAD_FUSION_DATA):
-			parseFusionData();
+		case (MENU_ITEM_JOHN_PIZZA_LOCATIONS):
+			parseFusionData("http://www.google.com/fusiontables/exporttable?query=select+col0%2C+col1%2C+col2%2C+col3+from+297050+&o=kmllink&g=col2");
+			return true;
+		case (MENU_ITEM_TREATMENT):
+			parseFusionData("http://www.google.com/fusiontables/exporttable?query=select+col0%2C+col1%2C+col2%2C+col3%2C+col4%2C+col5%2C+col6%2C+col7%2C+col8%2C+col9%2C+col10%2C+col11%2C+col12%2C+col13%2C+col14%2C+col15%2C+col16%2C+col17%2C+col18%2C+col19%2C+col20%2C+col21%2C+col22%2C+col23%2C+col24%2C+col25%2C+col26%2C+col27%2C+col28%2C+col29%2C+col30%2C+col31%2C+col32%2C+col33%2C+col34%2C+col35%2C+col36%2C+col37%2C+col38+from+502688+&o=kmllink&g=col25");
 			return true;
 		case (MENU_ITEM_SNAP_GPS):
 			if(currentGPSLocation!=null){sketchOverlay.SnapMarker(currentGPSLocation);}
@@ -379,7 +388,7 @@ public class GPSScreen extends MapActivity {
 		mapController.setZoom(15);
 	}
 	
-	private void parseFusionData()
+	private void parseFusionData(String url)
 	{
 		try
 		{
@@ -390,7 +399,10 @@ public class GPSScreen extends MapActivity {
 			 //URL sourceUrl = new URL("http://www.google.com/fusiontables/exporttable?query=select+col0%2C+col1%2C+col2%2C+col3%2C+col4%2C+col5%2C+col6%2C+col7%2C+col8%2C+col9%2C+col10%2C+col11%2C+col12%2C+col13%2C+col14+from+408650+&o=kmllink&g=col14");
 			 /** Create handler to handle XML Tags ( extends DefaultHandler ) */
 			 
-			 URL sourceUrl=new URL("http://www.google.com/fusiontables/exporttable?query=select+col0%2C+col1%2C+col2%2C+col3+from+297050+&o=kmllink&g=col2");
+			//
+//http://www.google.com/fusiontables/exporttable?query=select+col0%2C+col1%2C+col2%2C+col3%2C+col4%2C+col5%2C+col6%2C+col7%2C+col8%2C+col9%2C+col10%2C+col11%2C+col12%2C+col13%2C+col14%2C+col15%2C+col16%2C+col17%2C+col18%2C+col19+from+503057+&o=kmllink&g=col15
+
+			 URL sourceUrl=new URL(url);
 			 
 			 MyXMLHandler myXMLHandler = new MyXMLHandler();
 			 xr.setContentHandler(myXMLHandler);
