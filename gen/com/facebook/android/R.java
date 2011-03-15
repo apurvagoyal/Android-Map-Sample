@@ -73,6 +73,7 @@ public final class R {
         public static final int snap_gps_menu_text=0x7f060011;
         public static final int switch_map_view_menu_text=0x7f060015;
         public static final int switch_satellite_view_menu_text=0x7f060014;
+        public static final int wmi_treatment_menu_title=0x7f06001c;
     }
     public static final class style {
         public static final int GlobalTheme=0x7f070000;

@@ -196,7 +196,7 @@ Boolean inPolygonTag=false;
 							if(lat!=Double.NaN && lat!=0 & lng!=Double.NaN && lng!=0)
 						  	{
 							
-								poly.vertices.add(new GeoPoint(lat.intValue(), lng.intValue()));
+								poly.getVertices().add(new GeoPoint(lat.intValue(), lng.intValue()));
 						  	
 							
 						  	}

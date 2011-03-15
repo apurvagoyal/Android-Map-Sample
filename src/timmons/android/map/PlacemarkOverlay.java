@@ -116,8 +116,10 @@ public class PlacemarkOverlay extends Overlay{
 									
 									polyPath.lineTo(point2.x, point2.y);
 									polyPath.close();
+									
 									}
 								
+								placemarkPolygon.setPath(polyPath);
 							canvas.drawPath(polyPath, paint);
 							}
 							
@@ -138,6 +140,7 @@ public class PlacemarkOverlay extends Overlay{
 	{	
 		double distance=0;
 		Placemark nearestPlacemark=null;
+		GeoPoint geoPoint=null;
 		if(isIdentify)
 		{
 			for (Placemark pt : placemarks) {
@@ -148,7 +151,7 @@ public class PlacemarkOverlay extends Overlay{
 					if(shape instanceof PlacemarkPoint )
 					{
 						PlacemarkPoint placemarkPoint=(PlacemarkPoint)shape;
-						GeoPoint geoPoint=placemarkPoint.getShape();
+						geoPoint=placemarkPoint.getShape();
 						
 						Double lat=geoPoint.getLatitudeE6()/1E6;
 						Double lng=geoPoint.getLongitudeE6()/1E6;
@@ -176,6 +179,19 @@ public class PlacemarkOverlay extends Overlay{
 							}
 						}
 					}
+					else if(shape instanceof PlacemarkPolygon)
+					{
+						//position where user clicked on map
+						Point point2=new Point();
+						projection.toPixels(point,point2);
+						//find if that point is inside the polygon
+						PlacemarkPolygon placemarkPolygon=(PlacemarkPolygon)shape;
+						geoPoint=point;
+						if(placemarkPolygon.contains(point2.x, point2.y))
+						{
+							nearestPlacemark=pt;
+						}
+					}
 					
 				}
 				
@@ -192,11 +208,10 @@ public class PlacemarkOverlay extends Overlay{
 				alertDialog.setMessage(Html.fromHtml(currentDescription));
 				alertDialog.show();
 				**/
+				/**
 				PlacemarkShape shape=nearestPlacemark.getShape();
 				if(shape instanceof PlacemarkPoint )
-				{
-					PlacemarkPoint placemarkPoint=(PlacemarkPoint)shape;
-					GeoPoint geoPoint=placemarkPoint.getShape();
+				{				
 					
 					mapView.removeView(balloonLayout);
 					balloonLayout.setVisibility(View.VISIBLE);
@@ -206,15 +221,32 @@ public class PlacemarkOverlay extends Overlay{
 					                     mapView.getController().animateTo(geoPoint);
 					mapView.addView(balloonLayout, new MapView.LayoutParams(200,200,geoPoint,MapView.LayoutParams.BOTTOM_CENTER));
 					//mapView.setEnabled(false);        
-					isIdentify=false;
+					
 				
+				}
+				else if(shape instanceof PlacemarkPolygon)
+				{
+					PlacemarkPoint placemarkPoint=(PlacemarkPoint)shape;
+					GeoPoint geoPoint=placemarkPoint.getShape();
+					
+				
+				}
+				**/
+				if(geoPoint!=null)
+				{
+					mapView.removeView(balloonLayout);
+					balloonLayout.setVisibility(View.VISIBLE);
+					                     ((TextView)balloonLayout.findViewById(R.id.note_label)).setText(Html.fromHtml(currentDescription));
+					                     
+					                    
+					                     mapView.getController().animateTo(geoPoint);
+					mapView.addView(balloonLayout, new MapView.LayoutParams(200,200,geoPoint,MapView.LayoutParams.BOTTOM_CENTER));
 				}
 				
 				
 				
-				
-				
 			}
+			isIdentify=false;
 		}
 	
 	
