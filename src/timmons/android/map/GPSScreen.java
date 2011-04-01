@@ -122,10 +122,9 @@ public class GPSScreen extends MapActivity {
 		//Double lng = -74.044558*1E6;
 		//navigateToLocation(lat,lng);
 		
-		//add the overlay
-		sketchOverlay=new SketchOverlay();
+		
 		mapOverlays=googleMapView.getOverlays();
-		mapOverlays.add(sketchOverlay);
+		
 		
 		
 		
@@ -242,10 +241,17 @@ public class GPSScreen extends MapActivity {
 			}
 			return true;
 		case (MENU_ITEM_POINT):
+			//add the overlay
+			if(sketchOverlay==null){sketchOverlay=new SketchOverlay();}
+		
+		if(!mapOverlays.contains(sketchOverlay)){mapOverlays.add(sketchOverlay);}
 			currentShapeType=ShapeType.POINT;
 			sketchOverlay.SetShape(currentShapeType);
 		return true;
 		case (MENU_ITEM_LINE):
+			//add the overlay
+			if(sketchOverlay==null){sketchOverlay=new SketchOverlay();}
+		if(!mapOverlays.contains(sketchOverlay)){mapOverlays.add(sketchOverlay);}
 			currentShapeType=ShapeType.LINE;
 			sketchOverlay.SetShape(currentShapeType);
 			if(isFeatureStarted)
@@ -255,6 +261,9 @@ public class GPSScreen extends MapActivity {
 			isFeatureStarted=!isFeatureStarted;
 			return true;
 		case (MENU_ITEM_POLYGON):
+			//add the overlay
+			if(sketchOverlay==null){sketchOverlay=new SketchOverlay();}
+		if(!mapOverlays.contains(sketchOverlay)){mapOverlays.add(sketchOverlay);}
 			currentShapeType=ShapeType.POLYGON;
 			sketchOverlay.SetShape(currentShapeType);
 		if(isFeatureStarted)
